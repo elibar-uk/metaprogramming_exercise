@@ -7,34 +7,26 @@ attr_reader :name
 
   def initialize(name)
     @name = name
-    @woman = false
+    @status = nil
   end
 
   def is_a
-    @woman = true
+    @status = true
     self
-  end
-
-  def woman?
-    @woman
   end
 
   def is_not_a
+    @status = false
     self
   end
 
-  def method_missing(name, *args, &block)
-    create_instance_eval(self.class, name) do
-      instance_variable_set("@#{name}", false)
+  def method_missing(method_name, *args, &block)
+    return false if @status == nil
+    if method_name[-1] == '?' && instance_variable_defined?("@#{method_name[0..-2]}")
+      instance_variable_get("@#{method_name[0..-2]}")
+    elsif method_name[-1] != '?'
+      instance_variable_set("@#{method_name}", @status)
     end
-  end
-
-  def create_instance_eval(klass, method, &block)
-    klass.class_eval { define_method(method, &block) }
-  end
-
-  def respond_to_missing(method_name, include_private = false)
-    true
   end
 
 end
